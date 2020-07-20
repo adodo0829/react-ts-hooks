@@ -12,15 +12,13 @@ import React, { useState, useLayoutEffect, useEffect } from "react";
 
 function LayoutEffectComp() {
   const [color, setColor] = useState("red");
-
-  useLayoutEffect(() => {
-    alert(color);
-  });
-
+  
   useEffect(() => {
     console.log("color", color);
   });
-
+  useLayoutEffect(() => {
+    alert(color);
+  });
   return (
     <>
       <div id="myDiv" style={{ background: color }}>
