@@ -1,13 +1,17 @@
 import React, { useState } from "react";
 import LoginForm from "./hooks/useState/index";
 import "./styles/app.less";
+import Effect from './hooks/useEffect/index'
+import Counter from './hooks/useReducer/iindex'
+import ThemeColor from './hooks/useContext/index'
+import LayoutEffect from './hooks/useLayoutEffect/index'
 
 function App() {
   const [value, setValue] = useState(1);
 
   return (
     <>
-      <h1>useState</h1>
+      <h3>1.useState</h3>
 
       <section>
         <div className="single">
@@ -27,7 +31,25 @@ function App() {
         </div>
       </section>
 
-      <section></section>
+      <section>
+        <h3>2.useEffect</h3>
+        <Effect />
+      </section>
+
+      <section>
+        <h3>3.useContext</h3>
+        <ThemeColor />
+      </section>
+
+      <section>
+        <h3>4.useReducer</h3>
+        <Counter initialState={0} />
+      </section>
+
+      <section>
+        <h3>5.useLayoutEffect</h3>
+        <LayoutEffect />
+      </section>
     </>
   );
 }
