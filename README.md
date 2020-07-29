@@ -1,44 +1,229 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# react hooks
+hook函数, 函数组件, react特性
 
-## Available Scripts
+## 1.useState
+const [ count, setCount ] = useState(0)
 
-In the project directory, you can run:
+参数: js中的数据类型, 参数为函数时, useState中的函数只会执行一次
+返回值: 数组 [count, setCount]; 通过setCount可以设置更新后的值, setCount(count + 1)
 
-### `yarn start`
+** 注意state变化, 就会导致FC重新渲染, 重新执行内部逻辑 **
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## 2.useEffect
+通常我们在绑定事件、解绑事件、设定定时器、查找 dom 的时候，都是通过 componentDidMount、componentDidUpdate、componentWillUnmount 生命周期来实现的;
+而 useEffect 会在组件每次 render 之后调用，就相当于这三个生命周期函数，只不过可以通过`传参`来决定是否调用
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+```js
+useEffect(() => {
 
-### `yarn test`
+}, [])
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+// 参数1: 函数
+() => {
+  // do something: 相当于componentDidMount、componentDidUpdate
+  window.addEventListener('resize', onChange, false)
 
-### `yarn build`
+  return () => {
+    // clear something: 相当于componentWillUnmount
+     window.removeEventListener('resize', onChange, false)
+  }
+}
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+// 参数2: 依赖数组
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+// 什么都不传，组件每次 render 之后 useEffect 都会调用，相当于 componentDidMount 和 componentDidUpdate
+// 传入一个空数组 [], 只会调用一次，相当于 componentDidMount 和 componentWillUnmount
+// 传入一个数组，其中包括变量，只有这些变量变动时，useEffect 才会执行
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 3.useReducer
+适用于state 逻辑较复杂且包含多个子值, 或者下一个 state 依赖于之前的 state 等, 性能优化(传递dispatch方法)
+提供了一种复杂state的管理功能
 
-### `yarn eject`
+```tsx
+function reducer(state: any, action: any) {
+  switch (action.type) {
+    case "increment":
+      return { count: state.count + 1 };
+    case "decrement":
+      return { count: state.count - 1 };
+    default:
+      throw new Error();
+  }
+}
+interface Iprops {
+  [k: string]: number
+}
+// 父组件传值: initialState
+const Counter = ({ initialState }: Iprops) => {
+  // 1.指定初始 state: initialState
+  // const [state, dispatch] = useReducer(reducer, initialState);
+  // 2.惰性初始化: init 函数作为 useReducer 的第三个参数传入，这样初始 state 将被设置为 init(initialArg)。
+  const [state, dispatch] = useReducer(reducer, initialState, (initialState) => {
+    return { count: initialState }; // state
+  })
+  return (
+    <>
+      Count: {state.count}
+      <div>
+        <button onClick={() => dispatch({ type: "decrement" })}>-</button>
+        <button onClick={() => dispatch({ type: "increment" })}>+</button>
+      </div>
+    </>
+  );
+};
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## 4.useContext
+当一些数据需要全局用到的业务场景下：例如切换用户登录信息、切换语言、切换主题，props层层传递数据就显得复杂繁琐。
+Context提供了一种共享数据的方式，不用通过props层层传递数据，在任意一级组件中都可以直接获取到需要的数据。
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+提供了跨组件传值功能
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```tsx
+// themeContext
+import React from 'react';
+const defalutValue: any = null
+const ThemeContext = React.createContext(defalutValue);
+export default ThemeContext;
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+// Parent
+const Index = () => {
+  return (
+    // must be value=xxx
+    <ThemeContext.Provider value="green">
+      <CompA />
+    </ThemeContext.Provider>
+  );
+};
 
-## Learn More
+// Child
+export default () => {
+  const bg = useContext(ThemeContext)
+  console.log(bg); // green
+  return (
+    <p style={{ backgroundColor: bg }}>
+      Hello World, Context color
+    </p>
+  )
+}
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 5.useLayoutEffect
+useEffect 在全部渲染完毕后才会执行, 滞后于layout执行
+useLayoutEffect 会在 浏览器 layout 之后，painting 之前执行
+其函数签名与 useEffect 相同，但它会在所有的 DOM 变更之后同步调用 effect
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+可以使用它来读取 DOM 布局并同步触发重渲染
+在浏览器执行绘制之前 useLayoutEffect 内部的更新计划将被同步刷新
+尽可能使用标准的 useEffect 以避免阻塞视图更新
+```tsx
+import React, { useState, useLayoutEffect, useEffect } from "react";
+
+function LayoutEffectComp() {
+  const [color, setColor] = useState("red");
+
+  useLayoutEffect(() => {
+    // 每次先 alert
+    alert(color);
+  });
+
+  useEffect(() => {
+    console.log("color", color);
+  });
+
+  return (
+    <>
+      <div id="myDiv" style={{ background: color }}>
+        bgColor
+      </div>
+      <button onClick={() => setColor("red")}>红</button>
+      <button onClick={() => setColor("yellow")}>黄</button>
+      <button onClick={() => setColor("blue")}>蓝</button>
+    </>
+  );
+}
+```
+
+## 6.useRef
+**useRef的作用**
+- 获取DOM元素的节点: 操作自己和子元素(子元素通过const ChildRef = React.forwardRef(Child)传递)
+- 获取子组件的实例: (子组件为class类组件)
+- 渲染周期之间共享数据的存储 (通过给useRef返回的对象赋值, 设置成全局的变量, 跨多个effect来控制他)
+
+```tsx
+// 1.操作DOM
+// 1.1操作自己
+const refObj = useRef<HTMLDivElement>(null)
+const eleNode = refObj.current
+// 1.2操作子元素DOM
+const Child1 = React.forwardRef(Child)
+const inputRef = useRef()
+inputRef.current.value = 'focus';
+inputRef.current.focus()
+<Child1 ref={inputRef} />
+
+// 2.获取子元素实例, 子元素为类组件
+const childInstance = useRef() // react instatce obj
+<ChildRef ref={childInstance} />
+
+// 3.跨Effect共享数据
+const Index: FC = () => {
+  const [count, setCount] = useState(0);
+  // 把定时器设置成全局变量使用useRef挂载到current上
+  const timer = useRef() as any;
+  console.log(timer);
+
+  // 首次加载useEffect方法执行一次设置定时器
+  useEffect(() => {
+    timer.current = setInterval(() => {
+      setCount((count) => count + 1);
+    }, 1000);
+  }, []);
+  // count每次更新都会执行这个副作用，当count > 5时，清除定时器
+  useEffect(() => {
+    if (count > 5) {
+      clearInterval(timer.current);
+    }
+  });
+  return <h6>count: {count}</h6>;
+};
+```
+
+## useImperativeHandle
+可以操作子组件中多个DOM元素
+useImperativeHandle可以让你在使用 ref 时, 自定义暴露给父组件的实例值
+
+```tsx
+function Child(props: any, parentRef: any) {
+  // 子组件内部自己创建 ref
+  let focusRef = useRef() as any;
+  let inputRef = useRef() as any;
+  useImperativeHandle(parentRef, () => {
+    // 这个函数会返回一个对象
+    // 该对象会作为父组件 current 属性的值
+    // 通过这种方式，父组件可以使用操作子组件中的多个 ref
+    return {
+      focusRef,
+      inputRef,
+      name: "计数器",
+      focus() {
+        focusRef.current.focus();
+      },
+      changeText(text: string) {
+        inputRef.current.value = text;
+      },
+    };
+  });
+
+  return (
+    <>
+      <input ref={focusRef} />
+      <input ref={inputRef} />
+    </>
+  );
+}
+
+const ForwardChild = forwardRef(Child);
+
+```

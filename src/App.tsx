@@ -5,6 +5,8 @@ import Effect from './hooks/2.useEffect/index'
 import Counter from './hooks/5.useReducer/iindex'
 import ThemeColor from './hooks/4.useContext/index'
 import LayoutEffect from './hooks/3.useLayoutEffect/index'
+import Ref from './hooks/6.useRef/index'
+import ImperativeHandleRef from './hooks/7.useImperativeHandle'
 
 function App() {
   const [value, setValue] = useState(1);
@@ -49,6 +51,16 @@ function App() {
       <section>
         <h3>5.useLayoutEffect</h3>
         <LayoutEffect />
+      </section>
+
+      <section>
+        <h3>6.useRef</h3>
+        <Ref />
+      </section>
+
+      <section>
+        <h3>7.useImperativeHandle</h3>
+        <ImperativeHandleRef />
       </section>
     </>
   );
