@@ -190,7 +190,7 @@ const Index: FC = () => {
 };
 ```
 
-## useImperativeHandle
+## 7.useImperativeHandle
 可以操作子组件中多个DOM元素
 useImperativeHandle可以让你在使用 ref 时, 自定义暴露给父组件的实例值
 
@@ -226,4 +226,125 @@ function Child(props: any, parentRef: any) {
 
 const ForwardChild = forwardRef(Child);
 
+```
+
+## 8.custom hook
+自定义hook: 函数, 使用了其他hook的函数
+
+```ts
+/**
+ * 自定义 Hook 更像是一种约定，而不是一种功能。
+ * 如果函数的名字以 use 开头，并且调用了其他的 Hook，则就称其为一个自定义 Hook
+ * 有时候我们会想要在组件之间重用一些状态逻辑，之前要么用 render props ，要么用高阶组件，要么使用 redux
+ * 自定义 Hook 可以让你在不增加组件的情况下达到同样的目的
+ * Hook 是一种复用状态逻辑的方式，它不复用 state 本身
+ * 事实上 Hook 的每次调用都有一个完全独立的 state
+ */
+
+import { useState, useEffect } from 'react'
+
+const useNumber = () => {
+  const [num, setNum] = useState(0)
+
+  useEffect(() => {
+    
+    const timer = setInterval(() => {
+      setNum(num => num + 1)
+    }, 1000)
+
+    return () => {
+      clearInterval(timer)
+    }
+  }, [])
+
+  return [num, setNum]
+}
+
+export default useNumber
+```
+
+## 9.useCallback
+缓存函数引用
+
+```ts
+const memoizedCallback = useCallback(
+  () => {
+    doSomething(a, b);
+  },
+  [a, b],
+);
+```
+在a和b的变量值不变的情况下，memoizedCallback的引用不变。
+即：useCallback的第一个 入参函数 会被缓存，从而达到渲染性能优化的目的。
+useCallback缓存的是函数引用
+
+```tsx
+const Index: FC = () => {
+  const [count, setCount] = React.useState(0);
+  const [total, setTotal] = React.useState(0);
+  // 每次组件渲染时这个handleCount都是重新创建的一个新函数
+  // const handleCount = () => setCount(count + 1);
+
+  // 此时使用useCallback来缓存了函数，依赖项(deps)是一个空数组它代表这个函数在组件的生成周期内会永久缓存
+  // deps[]中依赖项不变的话, 函数引用也不变
+  const handleCount = useCallback(() => setCount(count => count + 1), []);
+  const handleTotal = () => setTotal(total + 1);
+  const prevHandleCount = usePrevProps(handleCount);
+
+  console.log(prevHandleCount, handleCount);
+  console.log("两次处理函数是否相等：", prevHandleCount === handleCount);
+
+  return (
+    <div>
+      <div>Count is {count}</div>
+      <div>Total is {total}</div>
+      <br />
+      <div>
+        <button onClick={handleCount}>Increment Count</button>
+        <button onClick={handleTotal}>Increment Total</button>
+      </div>
+    </div>
+  );
+};
+```
+
+## 10. useMemo
+缓存函数的返回值
+
+```ts
+const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);
+// 可理解：在a和b的变量值不变的情况下，memoizedValue的值不变。
+// 即：useMemo函数的第一个入参函数不会被执行，从而达到节省计算量的目的。
+// useMemo缓存计算数据的值
+```
+
+- 实例
+```tsx
+const Index: FC = () => {
+  const [count, setCount] = React.useState(0);
+  const [total, setTotal] = React.useState(0);
+
+  const calcValue = React.useMemo(() => {
+    return Array(100000)
+      .fill("")
+      .map((v) => /*一些大量计算*/ v + 1);
+      // 只有当count变量值改变的时候才会执行useMemo第一个入参的函数
+  }, [count]);
+
+  const handleCount = () => setCount((count) => count + 1);
+  const handleTotal = () => setTotal(total + 1);
+  const prevCalcValue = usePrevProps(calcValue);
+  
+  console.log("两次计算结果是否相等：", prevCalcValue === calcValue);
+  return (
+    <div>
+      <div>Count is {count}</div>
+      <div>Total is {total}</div>
+      <div>
+        <button onClick={handleCount}>Increment Count</button>
+        <button onClick={handleTotal}>Increment Total</button>
+      </div>
+    </div>
+  );
+};
 ```

@@ -7,6 +7,11 @@ import ThemeColor from './hooks/4.useContext/index'
 import LayoutEffect from './hooks/3.useLayoutEffect/index'
 import Ref from './hooks/6.useRef/index'
 import ImperativeHandleRef from './hooks/7.useImperativeHandle'
+import CustomerCounter from './hooks/8.customHooks/counter'
+import CustomerCounter1 from './hooks/8.customHooks/counter1'
+import CounterObjectIs from './hooks/9.useMemo'
+import Memo from './hooks/9.useMemo/memo'
+import Callback from './hooks/10.useCallback'
 
 function App() {
   const [value, setValue] = useState(1);
@@ -61,6 +66,27 @@ function App() {
       <section>
         <h3>7.useImperativeHandle</h3>
         <ImperativeHandleRef />
+      </section>
+
+      <section>
+        <h3>8.Customer hooks</h3>
+        <CustomerCounter />
+        <CustomerCounter1 />
+      </section>
+
+      <section>
+        <h3>9.CounterObjectIs</h3>
+        <CounterObjectIs />
+      </section>
+
+      <section>
+        <h3>10.useCallback</h3>
+        <Callback />
+      </section>
+
+      <section>
+        <h3>11.useMemo</h3>
+        <Memo />
       </section>
     </>
   );
