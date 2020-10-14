@@ -12,6 +12,7 @@ import CustomerCounter1 from './hooks/8.customHooks/counter1'
 import CounterObjectIs from './hooks/9.useMemo'
 import Memo from './hooks/9.useMemo/memo'
 import Callback from './hooks/10.useCallback'
+import NewState from './demos/1.获取最新的state'
 
 function App() {
   const [value, setValue] = useState(1);
@@ -87,6 +88,10 @@ function App() {
       <section>
         <h3>11.useMemo</h3>
         <Memo />
+      </section>
+
+      <section>
+        <NewState />
       </section>
     </>
   );
